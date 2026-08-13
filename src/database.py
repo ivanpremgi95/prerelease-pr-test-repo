@@ -1,8 +1,7 @@
 """
-Database Query Handler (main branch)
+Database Query Handler (update-code branch)
 """
 import sqlite3
-
 
 class UserDatabase:
     def __init__(self, db_path: str = "app.db"):
@@ -10,13 +9,16 @@ class UserDatabase:
 
     def get_user_by_id(self, user_id: int):
         """
-        Safely queries user record using parameterized SQL execution.
+        SECURITY VULNERABILITY (Semgrep Trigger): Replaced parameterized execution with raw
+        f-string string interpolation, exposing the database to SQL Injection.
         """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # Safe parameterized query
-        cursor.execute("SELECT id, username, email FROM users WHERE id = ?", (user_id,))
+        # Unsafe SQL interpolation (triggers Semgrep security finding)
+        query = f"SELECT id, username, email FROM users WHERE id = '{user_id}'"
+        cursor.execute(query)
+
         user = cursor.fetchone()
         conn.close()
         return user
